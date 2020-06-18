@@ -36,6 +36,7 @@ def connect_sql_db(sql_ip_port,username,pwd,db):
     #checking if db is present, if not creating the db
     if not database_exists(cnx.url):
         create_database(cnx.url)
+    print('connection to db successful')
     return cnx
 
 def create_table(connection_db,Base_ , tb='registered_users'):
@@ -61,11 +62,16 @@ user = User("adminn","password",'')
 session.add(user)
 session.commit()
 
-query = session.query(User).filter(User.username.in_(['adminnn']))
+query = session.query(User).filter(User.username.in_(['admin']))
+
 q=query.first()
+if q is None:
+    print("no user present")
+else:
+    print("user present")
 # q = session.query(username).all()
 
-print(q)
+print(type(q))
 
 
 
