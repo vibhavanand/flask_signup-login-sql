@@ -79,7 +79,7 @@ import pandas as pd
 #2 signup api
 app = Flask(__name__)
 @app.route('/signup', methods=['GET', 'POST'])
-def singup():
+def signup():
     if request.method == 'POST':
         engine = connect_sql_db('localhost:3306','root','','finale')
         #creating a session
@@ -105,14 +105,37 @@ def singup():
 
         else:
             return ("User is already present, please use login instead")
-        # if query
-        # # connection=connect_sql_db('localhost:3306','root','','finale')
-        # db=scoped_session(sessionmaker(bind=connection))
-        # # usernamedata=db.execute(“SELECT username FROM users WHERE {“username”=id}).fetchone
-        # if usernamedata is None:
-        #     # db.execute(“INSERT INTO users(name,username,password)
-        # print('ok')
+        
         return('ok')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        engine = connect_sql_db('localhost:3306','root','','finale')
+        #creating a session
+        Session = sessionmaker(bind=engine)
+        session = Session()
+
+        
+        data=request.json
+        user_name=data['username']
+        pwd=data['password']
+
+
+        query = session.query(User).filter(User.username.in_([user_name]))
+        q=query.first()
+        
+        if q is None:
+            print("no user present")
+            return("User is not present. Please use Signup to create an account.")
+        query = session.query(User).filter(User.username.in_([user_name]), User.password.in_([pwd]))
+        q = query.first()
+        if q is None:
+            print("no user present")
+            return("Username Password combination do not match.")
+        else:
+            return ("user details verified.")
+        
 
 # @app.route('/login', methods=['GET', 'POST'])
 # cnx=connect_sql_db('localhost:3306','root','','finale')

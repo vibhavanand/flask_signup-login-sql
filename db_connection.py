@@ -48,30 +48,30 @@ def create_table(connection_db,Base_ , tb='registered_users'):
 
 
 
-engine = connect_sql_db('localhost:3306','root','','finale')
-create_table(engine,Base)
-q = engine.table_names()
-print(q)
+# engine = connect_sql_db('localhost:3306','root','','finale')
+# create_table(engine,Base)
+# q = engine.table_names()
+# print(q)
 
 
-##
-Session = sessionmaker(bind=engine)
-session = Session()
+# ##
+# Session = sessionmaker(bind=engine)
+# session = Session()
 
-user = User("adminn","password",'')
-session.add(user)
-session.commit()
+# user = User("adminn","password",'')
+# session.add(user)
+# session.commit()
 
-query = session.query(User).filter(User.username.in_(['admin']))
+# query = session.query(User).filter(User.username.in_(['admin']))
 
-q=query.first()
-if q is None:
-    print("no user present")
-else:
-    print("user present")
-# q = session.query(username).all()
+# q=query.first()
+# if q is None:
+#     print("no user present")
+# else:
+#     print("user present")
+# # q = session.query(username).all()
 
-print(type(q))
+# print(type(q))
 
 
 
