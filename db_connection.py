@@ -3,6 +3,7 @@ from sqlalchemy import create_engine, ForeignKey
 from sqlalchemy import Column, Date, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref,sessionmaker
+import jwt
 
 from sqlalchemy_utils import database_exists, create_database
 
@@ -14,9 +15,9 @@ class User(Base):
     __tablename__ = "registered_users"
 
     id = Column(Integer, primary_key=True)
-    username = Column(String(12))
-    password = Column(String(12))
-    authentication_token = Column(String(12))
+    username = Column(String(122))
+    password = Column(String(122))
+    authentication_token = Column(String(1222))
     def __init__(self, name, password,authentication_token):
         self.username = name
         self.password = password
@@ -36,6 +37,7 @@ def connect_sql_db(sql_ip_port,username,pwd,db):
     #checking if db is present, if not creating the db
     if not database_exists(cnx.url):
         create_database(cnx.url)
+        print('11111databasecreated')
     print('connection to db successful')
     return cnx
 
@@ -43,31 +45,31 @@ def create_table(connection_db,Base_ , tb='registered_users'):
     cnx = connection_db
     #checking if table is present in db, if not creating it
     if not cnx.dialect.has_table(cnx, tb):  # If table don't exist, Create.
-        Base_.metadata.create_all(engine)
+        Base_.metadata.create_all(cnx)
         print('Table Creation Done')    
 
 
 
-engine = connect_sql_db('localhost:3306','root','','finale')
-create_table(engine,Base)
-q = engine.table_names()
-print(q)
+# engine = connect_sql_db('localhost:3306','root','','finale')
+# create_table(engine,Base)
+# q = engine.table_names()
+# print(q)
 
 
 ##
-Session = sessionmaker(bind=engine)
-session = Session()
+# Session = sessionmaker(bind=engine)
+# session = Session()
 
-user = User("adminnn","password",'')
-session.add(user)
-session.commit()
+# user = User("adminnn","password",'')
+# session.add(user)
+# session.commit()
 
-# query = session.query(User).filter(User.username.in_(['admin']))
-session.query(User).filter(User.username.in_(['adminn'])).update({'authentication_token': 'abcde'},synchronize_session=False)
-query = session.query(User).filter(User.authentication_token=='abcde')
-session.commit()
-q=query.first()
-print(q.authentication_token)
+# # query = session.query(User).filter(User.username.in_(['admin']))
+# session.query(User).filter(User.username.in_(['adminn'])).update({'authentication_token': 'abcde'},synchronize_session=False)
+# query = session.query(User).filter(User.authentication_token=='abcde')
+# session.commit()
+# q=query.first()
+# print(q.authentication_token)
 # if q is None:
 #     print("no user present")
 # else:

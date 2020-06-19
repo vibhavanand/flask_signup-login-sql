@@ -6,74 +6,20 @@ from sqlalchemy import *
 from sqlalchemy.orm import scoped_session,sessionmaker
 from db_connection import *
 
-# import 
+ 
 import pandas as pd
+import jwt
 
-
-#1a function to connect to mysql db and create a db if it is not present
-# def connect_sql_db(sql_ip_port,username,pwd,db):
-#     #params:
-#     # sql_ip_port :(ip:port) ip and port of sqldb
-#     # username : username of db user
-#     # pwd : password
-#     # db : database name  
-#     # cnx = create_engine('mysql+pymysql://root:@localhost:3306', pool_recycle=3600)
-#     connection_params = 'mysql+pymysql://'+username+':'+pwd+'@'+sql_ip_port+'/'+db
-#     cnx = create_engine(connection_params,pool_recycle=3600)
-#     #checking if db is present, if not creating the db
-#     if not database_exists(cnx.url):
-#         create_database(cnx.url)
-#     return cnx
-
-
-# def create_table(connection_db,tb):
-#     cnx = connection_db
-#     #checking if table is present in db, if not creating it
-#     if not cnx.dialect.has_table(cnx, tb):  # If table don't exist, Create.
-#         metadata = MetaData(cnx)
-#         # Create a table with the appropriate Columns
-#         Table(tb, metadata,
-#             Column('SNo.', Integer), 
-#             Column('username', String(255), primary_key=True, nullable=False),
-#             Column('Date_created', Date), Column('password', String(255)),  Column('Auth_token', String(255)))
-#         # Implement the creation
-#         metadata.create_all()
-#         print('HI')    
-    # return cnx
-
-# def insert_into_table(username,pwd,auth_token):
-#     connection=connect_sql_db('localhost:3306','root','','finale')
-#     db=scoped_session(sessionmaker(bind=connection))
-#     # usernamedata=db.execute(“SELECT username FROM users WHERE {“username”=id}).fetchone
-#     newToner = Toner(toner_id = 1,
-#                     toner_color = 'blue',
-#                     toner_hex = '#0F85FF')
-
-#     dbsession.add(newToner)   
-#     dbsession.flush()
-
-     
-
-    
-    # cnx = create_engine(connection_params,pool_recycle=3600)
-    # return cnx
-    # q = cnx.execute('SHOW DATABASES')
-    # available_tables = q.fetchall()
-    # print(available_tables)
-    # df = pd.read_sql('SELECT * FROM <table_name>', cnx)
-
-
-# def database_is_empty():
-#     table_names = sa.inspect(engine).get_table_names()
-#     is_empty = table_names == []
-#     print('Db is empty: {}'.format(is_empty))
-#     return is_empty
-
-# def table_exists(name):
-#     ret = engine.dialect.has_table(engine, name)
-#     print('Table "{}" exists: {}'.format(name, ret))
-#     return ret
-    
+#function for encoding and decoding auth tokens
+def encode_credentials_jwt(user_name,pwd):
+    encoded_jwt=jwt.encode({user_name: pwd}, 'secret', algorithm='HS256')
+    return encoded_jwt
+def decode_jwt(jwt_obtained):
+    decoded_jwt=jwt.decode(jwt_obtained,'secret',algorithms=['HS256'])
+    user_name=list(decoded_jwt.keys())[0]
+    pwd=decoded_jwt[user_name]
+    return {user_name:pwd}
+# print(encoded_jwt,decoded_jwt.keys())
 
 
 #2 signup api
@@ -81,7 +27,8 @@ app = Flask(__name__)
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
-        engine = connect_sql_db('localhost:3306','root','','finale')
+        engine = connect_sql_db('localhost:3306','root','','final')
+        
         #creating a session
         Session = sessionmaker(bind=engine)
         session = Session()
@@ -111,7 +58,7 @@ def signup():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        engine = connect_sql_db('localhost:3306','root','','finale')#hardcoded these, can be used from env file in dev environment
+        engine = connect_sql_db('localhost:3306','root','','final')#hardcoded these, can be used from env file in dev environment
         #creating a session
         Session = sessionmaker(bind=engine)
         session = Session()
@@ -141,7 +88,8 @@ def login():
         #if, verified, creating an access token,updating it in the DB to verify it in future and passing it to the client.
         else:
             print("user details verified, generating token.")
-            authtoken='abcde'
+            
+            authtoken=encode_credentials_jwt(user_name,pwd)
             session.query(User).filter(User.username.in_(['adminn'])).update({'authentication_token': authtoken},synchronize_session=False)
             session.commit()
             return ("user details verified. Here is your access token {}".format(authtoken))
@@ -151,15 +99,21 @@ def login():
 def auth_token():
     if request.method == 'POST':
         data=request.json
-        engine = connect_sql_db('localhost:3306','root','','finale')
+        engine = connect_sql_db('localhost:3306','root','','final')
         Session = sessionmaker(bind=engine)
         session = Session()
-
-        
+                
         auth_token_client=data['auth_token']
+        print(type(auth_token_client))
+        credentials_details=decode_jwt(auth_token_client)
         # query = session.query(User).filter(User.authentication_token.in_(['abcde'])).first()
         print(auth_token_client)
-        query = session.query(User).filter(User.authentication_token==auth_token_client).first()
+        user_name=list(credentials_details.keys())[0]
+        pwd=credentials_details[user_name]
+        print(user_name,pwd)
+        # query = session.query(User).filter(User.authentication_token==auth_token_client).first()
+        query = session.query(User).filter(User.username.in_([user_name]), User.password.in_([pwd]),User.authentication_token.in_([auth_token_client]))
+        q = query.first()
         if query is None:
             return ('invalid auth token')
         else:
@@ -183,4 +137,6 @@ def auth_token():
 #login api
 
 
-app.run()
+app.run(debug=True)
+
+# {"auth_token":"b'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhYmNkIjoicHdkIn0.VK8nqdPLSpiw7Iak2o7KUbzSirueRVUNCMP7Djy3I9c'"}
