@@ -48,23 +48,26 @@ def create_table(connection_db,Base_ , tb='registered_users'):
 
 
 
-# engine = connect_sql_db('localhost:3306','root','','finale')
-# create_table(engine,Base)
-# q = engine.table_names()
-# print(q)
+engine = connect_sql_db('localhost:3306','root','','finale')
+create_table(engine,Base)
+q = engine.table_names()
+print(q)
 
 
-# ##
-# Session = sessionmaker(bind=engine)
-# session = Session()
+##
+Session = sessionmaker(bind=engine)
+session = Session()
 
-# user = User("adminn","password",'')
-# session.add(user)
-# session.commit()
+user = User("adminnn","password",'')
+session.add(user)
+session.commit()
 
 # query = session.query(User).filter(User.username.in_(['admin']))
-
-# q=query.first()
+session.query(User).filter(User.username.in_(['adminn'])).update({'authentication_token': 1},synchronize_session=False)
+query = session.query(User).filter(User.username=='adminnn', User.authentication_token=='')
+session.commit()
+q=query.first()
+print(q.authentication_token)
 # if q is None:
 #     print("no user present")
 # else:

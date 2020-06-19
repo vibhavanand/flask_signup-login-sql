@@ -111,7 +111,7 @@ def signup():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        engine = connect_sql_db('localhost:3306','root','','finale')
+        engine = connect_sql_db('localhost:3306','root','','finale')#hardcoded these, can be used from env file in dev environment
         #creating a session
         Session = sessionmaker(bind=engine)
         session = Session()
@@ -121,20 +121,30 @@ def login():
         user_name=data['username']
         pwd=data['password']
 
-
+        #query to match if the given username is already present in DB
         query = session.query(User).filter(User.username.in_([user_name]))
         q=query.first()
         
+        #if user is present in DB, prompting him to make an account
         if q is None:
             print("no user present")
             return("User is not present. Please use Signup to create an account.")
+        
+        #query to match given username, pwd combo 
         query = session.query(User).filter(User.username.in_([user_name]), User.password.in_([pwd]))
         q = query.first()
+
+        #if the combo doesn't match, prompting him with an error message.
         if q is None:
             print("no user present")
             return("Username Password combination do not match.")
+        #if, verified, creating an access token,updating it in the DB to verify it in future and passing it to the client.
         else:
-            return ("user details verified.")
+            print("user details verified, generating token.")
+            authtoken='abcde'
+            session.query(User).filter(User.username.in_(['adminn'])).update({'authentication_token': authtoken},synchronize_session=False)
+            session.commit()
+            return ("user details verified. Here is your access token {}".format(authtoken))
         
 
 # @app.route('/login', methods=['GET', 'POST'])
