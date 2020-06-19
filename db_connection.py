@@ -7,7 +7,7 @@ import jwt
 
 from sqlalchemy_utils import database_exists, create_database
 
-# engine = create_engine('sqlite:///tutorial.db', echo=True)
+# base case for SQLalchemy ORM
 Base = declarative_base()
 
 class User(Base):
@@ -50,43 +50,3 @@ def create_table(connection_db,Base_ , tb='registered_users'):
 
 
 
-# engine = connect_sql_db('localhost:3306','root','','finale')
-# create_table(engine,Base)
-# q = engine.table_names()
-# print(q)
-
-
-##
-# Session = sessionmaker(bind=engine)
-# session = Session()
-
-# user = User("adminnn","password",'')
-# session.add(user)
-# session.commit()
-
-# # query = session.query(User).filter(User.username.in_(['admin']))
-# session.query(User).filter(User.username.in_(['adminn'])).update({'authentication_token': 'abcde'},synchronize_session=False)
-# query = session.query(User).filter(User.authentication_token=='abcde')
-# session.commit()
-# q=query.first()
-# print(q.authentication_token)
-# if q is None:
-#     print("no user present")
-# else:
-#     print("user present")
-# # q = session.query(username).all()
-
-# print(type(q))
-
-
-
-
-
-#----------------------------------------------------------------------
-# def __init__(self, username, password):
-# """"""
-# self.username = username
-# self.password = password
-
-# create tables
-# Base.metadata.create_all(engine)
