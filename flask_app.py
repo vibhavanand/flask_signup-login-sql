@@ -145,6 +145,27 @@ def login():
             session.query(User).filter(User.username.in_(['adminn'])).update({'authentication_token': authtoken},synchronize_session=False)
             session.commit()
             return ("user details verified. Here is your access token {}".format(authtoken))
+
+
+@app.route('/auth_token',methods=['POST','GET'])
+def auth_token():
+    if request.method == 'POST':
+        data=request.json
+        engine = connect_sql_db('localhost:3306','root','','finale')
+        Session = sessionmaker(bind=engine)
+        session = Session()
+
+        
+        auth_token_client=data['auth_token']
+        # query = session.query(User).filter(User.authentication_token.in_(['abcde'])).first()
+        print(auth_token_client)
+        query = session.query(User).filter(User.authentication_token==auth_token_client).first()
+        if query is None:
+            return ('invalid auth token')
+        else:
+            return ('token validated.')
+        
+
         
 
 # @app.route('/login', methods=['GET', 'POST'])
