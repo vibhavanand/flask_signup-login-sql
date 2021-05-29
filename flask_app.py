@@ -59,7 +59,7 @@ def signup():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        engine = connect_sql_db('localhost:3306','root','','done')#hardcoded these, can be used from env file in dev environment later
+        engine = connect_sql_db('localhost:3306','root','password','done')#hardcoded these, can be used from env file in dev environment later
         #creating a session
         Session = sessionmaker(bind=engine)
         session = Session()
@@ -95,6 +95,8 @@ def login():
             session.query(User).filter(User.username.in_(['adminn'])).update({'authentication_token': authtoken},synchronize_session=False)
             session.commit()
             return jsonify({"success":"True","msg":"user verified","Access_token":authtoken})
+    if request.method == 'GET':
+        return jsonify({"message": "be a dear and send correct parameters"})
 
 
 @app.route('/auth_token',methods=['POST','GET'])
