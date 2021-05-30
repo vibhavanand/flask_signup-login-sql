@@ -33,7 +33,7 @@ app = Flask(__name__)
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
-        engine = connect_sql_db('localhost:3306', 'root', 'password', 'done')
+        engine = connect_sql_db('mysql:3306', 'root', 'password', 'done')
 
         # creating a session
         Session = sessionmaker(bind=engine)
@@ -66,7 +66,7 @@ def signup():
 def login():
     if request.method == 'POST':
         # hardcoded these, can be used from env file in dev environment later
-        engine = connect_sql_db('localhost:3306', 'root', 'password', 'done')
+        engine = connect_sql_db('mysql:3306', 'root', 'password', 'done')
         # creating a session
         Session = sessionmaker(bind=engine)
         session = Session()
@@ -114,7 +114,7 @@ def login():
 def auth_token():
     if request.method == 'POST':
         data = request.json
-        engine = connect_sql_db('localhost:3306', 'root', '', 'done')
+        engine = connect_sql_db('mysql:3306', 'root', 'password', 'done')
         Session = sessionmaker(bind=engine)
         session = Session()
 
